@@ -48,10 +48,7 @@ impl<'a> NotificationAction<'a> for Initialized {
         let ctx = ctx.inited();
 
         // TODO we should watch for workspace Cargo.tomls too
-        let pattern = format!(
-            "{}/Cargo{{.toml,.lock}}",
-            ctx.current_project.to_str().unwrap()
-        );
+        let pattern = format!("{}/Cargo{{.toml,.lock}}", ctx.current_project.to_str().unwrap());
         let target_pattern = format!("{}/target", ctx.current_project.to_str().unwrap());
         // For target, we only watch if it gets deleted.
         let options = json!({
@@ -122,11 +119,7 @@ impl<'a> NotificationAction<'a> for DidChange {
         ctx: &mut ActionContext,
         out: O,
     ) -> Result<(), ()> {
-        trace!(
-            "on_change: {:?}, thread: {:?}",
-            params,
-            thread::current().id()
-        );
+        trace!("on_change: {:?}, thread: {:?}", params, thread::current().id());
 
         let ctx = ctx.inited();
         let file_path = parse_file_path!(&params.text_document.uri, "on_change")?;
@@ -220,11 +213,7 @@ impl<'a> NotificationAction<'a> for DidChangeConfiguration {
                 value
             }
             Err(err) => {
-                debug!(
-                    "Received unactionable config: {:?} (error: {:?})",
-                    params.settings,
-                    err
-                );
+                debug!("Received unactionable config: {:?} (error: {:?})", params.settings, err);
                 return Err(());
             }
         };

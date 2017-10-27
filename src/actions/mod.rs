@@ -153,10 +153,7 @@ impl InitActionContext {
         thread::spawn(move || {
             let mut config = config.lock().unwrap();
             if let Err(e) = config.infer_defaults(&current_project) {
-                debug!(
-                    "Encountered an error while trying to infer config defaults: {:?}",
-                    e
-                );
+                debug!("Encountered an error while trying to infer config defaults: {:?}", e);
             }
         });
 
@@ -232,10 +229,7 @@ fn find_word_at_pos(line: &str, pos: &Column) -> (Column, Column) {
         .map(|(i, _)| i)
         .unwrap_or(col) as u32;
 
-    (
-        span::Column::new_zero_indexed(start),
-        span::Column::new_zero_indexed(end),
-    )
+    (span::Column::new_zero_indexed(start), span::Column::new_zero_indexed(end))
 }
 
 #[cfg(test)]
@@ -249,12 +243,7 @@ mod test {
             let col = test_str.find('|').unwrap() as u32;
             let line = test_str.replace('|', "");
             let (start, end) = find_word_at_pos(&line, &Column::new_zero_indexed(col));
-            assert_eq!(
-                range,
-                (start.0, end.0),
-                "Assertion failed for {:?}",
-                test_str
-            );
+            assert_eq!(range, (start.0, end.0), "Assertion failed for {:?}", test_str);
         }
 
         assert_range("|struct Def {", (0, 6));

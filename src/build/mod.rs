@@ -477,14 +477,7 @@ impl Internals {
         let envs = &compile_cx.envs;
         let build_dir = compile_cx.build_dir.as_ref().unwrap();
         let env_lock = self.env_lock.as_facade();
-        rustc::rustc(
-            &self.vfs,
-            args,
-            envs,
-            build_dir,
-            self.config.clone(),
-            env_lock,
-        )
+        rustc::rustc(&self.vfs, args, envs, build_dir, self.config.clone(), env_lock)
     }
 }
 

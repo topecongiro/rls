@@ -44,10 +44,7 @@ impl MessageReader for StdioMsgReader {
 
         // Read in the "Content-length: xx" part
         let mut buffer = String::new();
-        handle_err!(
-            io::stdin().read_line(&mut buffer),
-            "Could not read from stdin"
-        );
+        handle_err!(io::stdin().read_line(&mut buffer), "Could not read from stdin");
 
         if buffer.is_empty() {
             debug!("Header is empty");
@@ -67,10 +64,7 @@ impl MessageReader for StdioMsgReader {
             return None;
         }
 
-        let size = handle_err!(
-            usize::from_str_radix(&res[1].trim(), 10),
-            "Couldn't read size"
-        );
+        let size = handle_err!(usize::from_str_radix(&res[1].trim(), 10), "Couldn't read size");
         trace!("reading: {} bytes", size);
 
         // Skip the new lines
@@ -78,10 +72,7 @@ impl MessageReader for StdioMsgReader {
         handle_err!(io::stdin().read_line(&mut tmp), "Could not read from stdin");
 
         let mut content = vec![0; size];
-        handle_err!(
-            io::stdin().read_exact(&mut content),
-            "Could not read from stdin"
-        );
+        handle_err!(io::stdin().read_exact(&mut content), "Could not read from stdin");
 
         let content = handle_err!(String::from_utf8(content), "Non-utf8 input");
 

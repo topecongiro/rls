@@ -43,10 +43,8 @@ impl<O: Output> PostBuildHandler<O> {
     pub fn handle(self, result: BuildResult) {
         // We use `rustDocument` document here since these notifications are
         // custom to the RLS and not part of the LS protocol.
-        self.out.notify(NotificationMessage::new(
-            NOTIFICATION_DIAGNOSTICS_BEGIN,
-            None,
-        ));
+        self.out
+            .notify(NotificationMessage::new(NOTIFICATION_DIAGNOSTICS_BEGIN, None));
 
         match result {
             BuildResult::Success(messages, new_analysis) |
@@ -256,9 +254,8 @@ fn emit_notifications<O: Output>(build_results: &BuildResults, show_warnings: bo
                 .collect(),
         };
 
-        out.notify(NotificationMessage::new(
-            ls_types::NOTIFICATION__PublishDiagnostics,
-            Some(params),
-        ));
+        out.notify(
+            NotificationMessage::new(ls_types::NOTIFICATION__PublishDiagnostics, Some(params)),
+        );
     }
 }

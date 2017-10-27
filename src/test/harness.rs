@@ -87,10 +87,7 @@ impl Environment {
         let reader = Box::new(MockMsgReader::new(messages));
         let output = RecordOutput::new();
         let results = output.output.clone();
-        (
-            ls_server::LsService::new(analysis, vfs, config, reader, output),
-            results,
-        )
+        (ls_server::LsService::new(analysis, vfs, config, reader, output), results)
     }
 }
 
@@ -205,11 +202,7 @@ pub fn expect_messages(results: LsResultList, expected: &[&ExpectedMessage]) {
 
     let mut results = results.lock().unwrap();
 
-    println!(
-        "expect_messages:\n  results: {:#?},\n  expected: {:#?}",
-        *results,
-        expected
-    );
+    println!("expect_messages:\n  results: {:#?},\n  expected: {:#?}", *results, expected);
     assert_eq!(results.len(), expected.len());
     for (found, expected) in results.iter().zip(expected.iter()) {
         let values: serde_json::Value = serde_json::from_str(found).unwrap();

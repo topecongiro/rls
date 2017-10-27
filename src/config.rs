@@ -223,10 +223,7 @@ impl Config {
             false => ws.current()?,
         };
 
-        trace!(
-            "infer_config_defaults: Auto-detected `{}` package",
-            package.name()
-        );
+        trace!("infer_config_defaults: Auto-detected `{}` package", package.name());
 
         let targets = package.targets();
         let (lib, bin) = if targets.iter().any(|x| x.is_lib()) {
@@ -247,11 +244,7 @@ impl Config {
             (false, Some(target.name().to_owned()))
         };
 
-        trace!(
-            "infer_config_defaults: build_lib: {:?}, build_bin: {:?}",
-            lib,
-            bin
-        );
+        trace!("infer_config_defaults: build_lib: {:?}, build_bin: {:?}", lib, bin);
 
         // Unless crate target is explicitly specified, mark the values as
         // inferred, so they're not simply ovewritten on config change without

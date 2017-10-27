@@ -823,14 +823,7 @@ impl<'a> RequestAction<'a> for RangeFormatting {
         ctx: &mut ActionContext,
         out: O,
     ) -> Result<Self::Response, ()> {
-        reformat(
-            id,
-            params.text_document,
-            Some(params.range),
-            &params.options,
-            ctx,
-            out,
-        )
+        reformat(id, params.text_document, Some(params.range), &params.options, ctx, out)
     }
 }
 
@@ -842,14 +835,7 @@ fn reformat<O: Output>(
     ctx: &mut ActionContext,
     out: O,
 ) -> Result<[TextEdit; 1], ()> {
-    trace!(
-        "Reformat: {} {:?} {:?} {} {}",
-        id,
-        doc,
-        selection,
-        opts.tab_size,
-        opts.insert_spaces
-    );
+    trace!("Reformat: {} {:?} {:?} {} {}", id, doc, selection, opts.tab_size, opts.insert_spaces);
     let ctx = ctx.inited();
     let path = parse_file_path!(&doc.uri, "reformat")?;
 
@@ -886,10 +872,8 @@ fn reformat<O: Output>(
 
     if let Some(r) = selection {
         let range_of_rls = ls_util::range_to_rls(r).one_indexed();
-        let range = RustfmtRange::new(
-            range_of_rls.row_start.0 as usize,
-            range_of_rls.row_end.0 as usize,
-        );
+        let range =
+            RustfmtRange::new(range_of_rls.row_start.0 as usize, range_of_rls.row_end.0 as usize);
         let mut ranges = HashMap::new();
         ranges.insert("stdin".to_owned(), vec![range]);
         let file_lines = FileLines::from_ranges(ranges);
@@ -914,10 +898,7 @@ fn reformat<O: Output>(
                     },
                 ])
             } else {
-                debug!(
-                    "reformat: format_input failed: has errors, summary = {:?}",
-                    summary
-                );
+                debug!("reformat: format_input failed: has errors, summary = {:?}", summary);
 
                 out.failure_message(
                     id,

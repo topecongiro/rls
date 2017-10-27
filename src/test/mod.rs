@@ -673,9 +673,7 @@ fn test_multiple_binaries() {
         initialize(0, root_path.as_os_str().to_str().map(|x| x.to_owned())).to_string(),
     ];
 
-    env.with_config(|c| {
-        c.build_bin = Inferrable::Specified(Some("bin2".to_owned()))
-    });
+    env.with_config(|c| c.build_bin = Inferrable::Specified(Some("bin2".to_owned())));
     let (mut server, results) = env.mock_server(messages);
     // Initialise and build.
     assert_eq!(

@@ -50,17 +50,9 @@ pub(super) fn cargo(internals: &Internals) -> BuildResult {
     // we may be in separate threads we need to block and wait our thread.
     // However, if Cargo doesn't run a separate thread, then we'll just wait
     // forever. Therefore, we spawn an extra thread here to be safe.
-    let handle = thread::spawn(|| {
-        run_cargo(
-            compilation_cx,
-            config,
-            vfs,
-            env_lock,
-            diagnostics,
-            analyses,
-            out,
-        )
-    });
+    let handle = thread::spawn(
+        || run_cargo(compilation_cx, config, vfs, env_lock, diagnostics, analyses, out),
+    );
 
     match handle
         .join()
@@ -373,11 +365,7 @@ impl Executor for RlsExecutor {
             } else {
                 ""
             };
-            trace!(
-                "rustc not intercepted - {}{}",
-                id.name(),
-                build_script_notice
-            );
+            trace!("rustc not intercepted - {}{}", id.name(), build_script_notice);
 
             if ::CRATE_BLACKLIST.contains(&&*crate_name) {
                 // By running the original command (rather than using our shim), we
@@ -396,11 +384,7 @@ impl Executor for RlsExecutor {
             return cmd.exec();
         }
 
-        trace!(
-            "rustc intercepted - args: {:?} envs: {:?}",
-            cargo_args,
-            cargo_cmd.get_envs()
-        );
+        trace!("rustc intercepted - args: {:?} envs: {:?}", cargo_args, cargo_cmd.get_envs());
 
         let mut args: Vec<_> = cargo_args
             .iter()
@@ -440,7 +424,8 @@ impl Executor for RlsExecutor {
             // so the dep-info is ready by the time we return from this callback.
             // NB: In `workspace_mode` regular compilation is performed here (and we don't
             // only calculate dep-info) so it should fix the problem mentioned above.
-            let modified = args.iter()
+            let modified =
+                args.iter()
                 .map(|a| {
                     // Emitting only dep-info is possible only for final crate type, as
                     // as others may emit required metadata for dependent crate types

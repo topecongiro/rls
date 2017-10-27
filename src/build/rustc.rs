@@ -48,12 +48,7 @@ pub fn rustc(
     rls_config: Arc<Mutex<Config>>,
     env_lock: EnvironmentLockFacade,
 ) -> BuildResult {
-    trace!(
-        "rustc - args: `{:?}`, envs: {:?}, build dir: {:?}",
-        args,
-        envs,
-        build_dir
-    );
+    trace!("rustc - args: `{:?}`, envs: {:?}, build dir: {:?}", args, envs, build_dir);
 
     let changed = vfs.get_cached_files();
 

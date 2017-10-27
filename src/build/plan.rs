@@ -163,9 +163,7 @@ impl Plan {
         let other_targets: HashMap<UnitKey, &Path> = self.units
             .iter()
             .filter(|&(&(_, ref kind), _)| *kind != TargetKind::CustomBuild)
-            .map(|(key, ref unit)| {
-                (key.clone(), unit.target.src_path().parent().unwrap())
-            })
+            .map(|(key, ref unit)| (key.clone(), unit.target.src_path().parent().unwrap()))
             .collect();
 
         for modified in files {
@@ -183,10 +181,9 @@ impl Plan {
                         .count()
                 });
                 match unit {
-                    None => trace!(
-                        "Modified file {:?} doesn't correspond to any package!",
-                        modified
-                    ),
+                    None => {
+                        trace!("Modified file {:?} doesn't correspond to any package!", modified)
+                    }
                     Some(unit) => {
                         result.insert(unit.0.clone());
                     }
@@ -282,11 +279,7 @@ impl Plan {
         }
 
         let dirties = self.fetch_dirty_units(modified);
-        trace!(
-            "fetch_dirty_units: for files {:?}, these units are dirty: {:?}",
-            modified,
-            dirties
-        );
+        trace!("fetch_dirty_units: for files {:?}, these units are dirty: {:?}", modified, dirties);
 
         if dirties
             .iter()
