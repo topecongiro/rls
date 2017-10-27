@@ -249,23 +249,26 @@ fn test_workspace_symbol() {
         ls_server::ServerStateChange::Continue
     );
 
+    let expected_ranges = &[
+        r#""range":{"start":{"line":11,"character":11},"end":{"line":11,"character":15}}"#,
+        r#""range":{"start":{"line":0,"character":4},"end":{"line":0,"character":8}}"#,
+    ];
     expect_messages(
         results.clone(),
         &[
             ExpectedMessage::new(Some(42)).expect_contains(r#""id":42"#)
-                                                                     // in main.rs
-                                                                     .expect_contains(r#"main.rs"#)
-                                                                     .expect_contains(r#""name":"nemo""#)
-                                                                     .expect_contains(r#""kind":12"#)
-                                                                     .expect_contains(r#""range":{"start":{"line":11,"character":11},"end":{"line":11,"character":15}}"#)
-                                                                     .expect_contains(r#""containerName":"x""#)
-
-                                                                     // in foo.rs
-                                                                     .expect_contains(r#"foo.rs"#)
-                                                                     .expect_contains(r#""name":"nemo""#)
-                                                                     .expect_contains(r#""kind":5"#)
-                                                                     .expect_contains(r#""range":{"start":{"line":0,"character":4},"end":{"line":0,"character":8}}"#)
-                                                                     .expect_contains(r#""containerName":"foo""#),
+                // in main.rs
+                .expect_contains(r#"main.rs"#)
+                .expect_contains(r#""name":"nemo""#)
+                .expect_contains(r#""kind":12"#)
+                .expect_contains(expected_ranges[0])
+                .expect_contains(r#""containerName":"x""#)
+                // in foo.rs
+                .expect_contains(r#"foo.rs"#)
+                .expect_contains(r#""name":"nemo""#)
+                .expect_contains(r#""kind":5"#)
+                .expect_contains(expected_ranges[1])
+                .expect_contains(r#""containerName":"foo""#),
         ],
     );
 }
@@ -1050,16 +1053,17 @@ fn test_find_impls() {
         ls_server::ServerStateChange::Continue
     );
     // TODO structural checking of result, rather than looking for a string - src(&source_file_path, 12, "world")
+    let expected_ranges = &[
+        r#""range":{"start":{"line":18,"character":15},"end":{"line":18,"character":18}}"#,
+        r#""range":{"start":{"line":19,"character":12},"end":{"line":19,"character":15}}"#,
+        r#""range":{"start":{"line":22,"character":15},"end":{"line":22,"character":18}}"#,
+    ];
     expect_messages(
         results.clone(),
         &[
             ExpectedMessage::new(Some(1))
-                .expect_contains(
-                    r#""range":{"start":{"line":18,"character":15},"end":{"line":18,"character":18}}"#,
-                )
-                .expect_contains(
-                    r#""range":{"start":{"line":19,"character":12},"end":{"line":19,"character":15}}"#,
-                ),
+                .expect_contains(expected_ranges[0])
+                .expect_contains(expected_ranges[1]),
         ],
     );
     assert_eq!(
@@ -1070,12 +1074,8 @@ fn test_find_impls() {
         results.clone(),
         &[
             ExpectedMessage::new(Some(2))
-                .expect_contains(
-                    r#""range":{"start":{"line":18,"character":15},"end":{"line":18,"character":18}}"#,
-                )
-                .expect_contains(
-                    r#""range":{"start":{"line":22,"character":15},"end":{"line":22,"character":18}}"#,
-                ),
+                .expect_contains(expected_ranges[0])
+                .expect_contains(expected_ranges[2]),
         ],
     );
     // Does not work on Travis

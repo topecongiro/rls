@@ -156,7 +156,8 @@ fn run_cargo(
             for package in &opts.package {
                 if let None = ws.members().find(|x| x.name() == package) {
                     warn!(
-                        "cargo - couldn't find member package `{}` specified in `analyze_package` configuration",
+                        "cargo - couldn't find member package `{}` specified in `analyze_package` \
+                         configuration",
                         package
                     );
                 }

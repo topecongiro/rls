@@ -235,7 +235,9 @@ impl Plan {
             // Remove nodes that are not dirty
             .filter(|&(unit, _)| dirties.contains(&unit))
             // Retain only dirty dependencies of the ones that are dirty
-            .map(|(k, deps)| (k.clone(), deps.iter().cloned().filter(|d| dirties.contains(&d)).collect()))
+            .map(|(k, deps)| {
+                (k.clone(), deps.iter().cloned().filter(|d| dirties.contains(&d)).collect())
+            })
             .collect()
     }
 
