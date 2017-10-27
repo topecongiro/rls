@@ -15,10 +15,11 @@
 use actions::requests;
 use analysis::{AnalysisHost, Target};
 use config::Config;
-use server::{self, Request, Notification, LsService, NoParams};
+use server::{self, LsService, NoParams, Notification, Request};
 use vfs::Vfs;
 
-use ls_types::{ClientCapabilities, TextDocumentPositionParams, TextDocumentIdentifier, TraceOption, Position, InitializeParams, RenameParams};
+use ls_types::{ClientCapabilities, InitializeParams, Position, RenameParams,
+               TextDocumentIdentifier, TextDocumentPositionParams, TraceOption};
 
 use std::fmt;
 use std::io::{stdin, stdout, Write};
@@ -26,7 +27,7 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::time::Duration;
 use url::Url;
@@ -49,7 +50,9 @@ pub fn run() {
         print!("> ");
         stdout().flush().unwrap();
         let mut input = String::new();
-        stdin().read_line(&mut input).expect("Could not read from stdin");
+        stdin()
+            .read_line(&mut input)
+            .expect("Could not read from stdin");
 
         // Split the input into an action command and args
         let mut bits = input.split_whitespace();
@@ -85,8 +88,12 @@ pub fn run() {
                 continue;
             }
             "q" | "quit" => {
-                sender.send(shutdown().to_string()).expect("Error sending on channel");
-                sender.send(exit().to_string()).expect("Error sending on channel");
+                sender
+                    .send(shutdown().to_string())
+                    .expect("Error sending on channel");
+                sender
+                    .send(exit().to_string())
+                    .expect("Error sending on channel");
                 // Sometimes we don't quite exit in time and we get an error on the channel. Hack it.
                 thread::sleep(Duration::from_millis(100));
                 return;
@@ -105,8 +112,10 @@ pub fn run() {
 fn def<'a>(file_name: &str, row: &str, col: &str) -> Request<'a, requests::Definition> {
     let params = TextDocumentPositionParams {
         text_document: TextDocumentIdentifier::new(url(file_name)),
-        position: Position::new(u64::from_str(row).expect("Bad line number"),
-                                u64::from_str(col).expect("Bad column number")),
+        position: Position::new(
+            u64::from_str(row).expect("Bad line number"),
+            u64::from_str(col).expect("Bad column number"),
+        ),
     };
     Request {
         id: next_id(),
@@ -115,11 +124,18 @@ fn def<'a>(file_name: &str, row: &str, col: &str) -> Request<'a, requests::Defin
     }
 }
 
-fn rename<'a>(file_name: &str, row: &str, col: &str, new_name: &str) -> Request<'a, requests::Rename> {
+fn rename<'a>(
+    file_name: &str,
+    row: &str,
+    col: &str,
+    new_name: &str,
+) -> Request<'a, requests::Rename> {
     let params = RenameParams {
         text_document: TextDocumentIdentifier::new(url(file_name)),
-        position: Position::new(u64::from_str(row).expect("Bad line number"),
-                                u64::from_str(col).expect("Bad column number")),
+        position: Position::new(
+            u64::from_str(row).expect("Bad line number"),
+            u64::from_str(col).expect("Bad column number"),
+        ),
         new_name: new_name.to_owned(),
     };
     Request {
@@ -132,8 +148,10 @@ fn rename<'a>(file_name: &str, row: &str, col: &str, new_name: &str) -> Request<
 fn hover<'a>(file_name: &str, row: &str, col: &str) -> Request<'a, requests::Hover> {
     let params = TextDocumentPositionParams {
         text_document: TextDocumentIdentifier::new(url(file_name)),
-        position: Position::new(u64::from_str(row).expect("Bad line number"),
-                                u64::from_str(col).expect("Bad column number")),
+        position: Position::new(
+            u64::from_str(row).expect("Bad line number"),
+            u64::from_str(col).expect("Bad column number"),
+        ),
     };
     Request {
         id: next_id(),
@@ -178,7 +196,9 @@ fn initialize<'a>(root_path: String) -> Request<'a, server::InitializeRequest> {
 }
 
 fn url(file_name: &str) -> Url {
-    let path = Path::new(file_name).canonicalize().expect("Could not canonicalize file name");
+    let path = Path::new(file_name)
+        .canonicalize()
+        .expect("Could not canonicalize file name");
     Url::parse(&format!("file://{}", path.to_str().unwrap())).expect("Bad file name")
 }
 
@@ -235,14 +255,26 @@ fn init() -> Sender<String> {
     let vfs = Arc::new(Vfs::new());
     let (sender, receiver) = channel();
 
-    let service = LsService::new(analysis,
-                                 vfs,
-                                 Arc::new(Mutex::new(Config::default())),
-                                 Box::new(ChannelMsgReader::new(receiver)),
-                                 PrintlnOutput);
+    let service = LsService::new(
+        analysis,
+        vfs,
+        Arc::new(Mutex::new(Config::default())),
+        Box::new(ChannelMsgReader::new(receiver)),
+        PrintlnOutput,
+    );
     thread::spawn(move || LsService::run(service));
 
-    sender.send(initialize(::std::env::current_dir().unwrap().to_str().unwrap().to_owned()).to_string()).expect("Error sending init");
+    sender
+        .send(
+            initialize(
+                ::std::env::current_dir()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_owned(),
+            ).to_string(),
+        )
+        .expect("Error sending init");
     println!("Initialising (look for `diagnosticsEnd` message)...");
 
     sender

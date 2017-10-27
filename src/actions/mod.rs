@@ -54,16 +54,28 @@ pub enum ActionContext {
 }
 
 impl ActionContext {
-    pub fn new(analysis: Arc<AnalysisHost>,
-               vfs: Arc<Vfs>,
-               config: Arc<Mutex<Config>>) -> ActionContext {
+    pub fn new(
+        analysis: Arc<AnalysisHost>,
+        vfs: Arc<Vfs>,
+        config: Arc<Mutex<Config>>,
+    ) -> ActionContext {
         ActionContext::Uninit(UninitActionContext::new(analysis, vfs, config))
     }
 
-    pub fn init<O: Output>(&mut self, current_project: PathBuf, init_options: &InitializationOptions, out: O) {
+    pub fn init<O: Output>(
+        &mut self,
+        current_project: PathBuf,
+        init_options: &InitializationOptions,
+        out: O,
+    ) {
         let ctx = match *self {
             ActionContext::Uninit(ref uninit) => {
-                let ctx = InitActionContext::new(uninit.analysis.clone(), uninit.vfs.clone(), uninit.config.clone(), current_project);
+                let ctx = InitActionContext::new(
+                    uninit.analysis.clone(),
+                    uninit.vfs.clone(),
+                    uninit.config.clone(),
+                    current_project,
+                );
                 ctx.init(init_options, out);
                 ctx
             }
@@ -100,23 +112,26 @@ pub struct UninitActionContext {
 }
 
 impl UninitActionContext {
-    fn new(analysis: Arc<AnalysisHost>,
-               vfs: Arc<Vfs>,
-               config: Arc<Mutex<Config>>) -> UninitActionContext {
+    fn new(
+        analysis: Arc<AnalysisHost>,
+        vfs: Arc<Vfs>,
+        config: Arc<Mutex<Config>>,
+    ) -> UninitActionContext {
         UninitActionContext {
             analysis,
             vfs,
             config,
         }
     }
-
 }
 
 impl InitActionContext {
-    fn new(analysis: Arc<AnalysisHost>,
-               vfs: Arc<Vfs>,
-               config: Arc<Mutex<Config>>,
-               current_project: PathBuf) -> InitActionContext {
+    fn new(
+        analysis: Arc<AnalysisHost>,
+        vfs: Arc<Vfs>,
+        config: Arc<Mutex<Config>>,
+        current_project: PathBuf,
+    ) -> InitActionContext {
         let build_queue = BuildQueue::new(vfs.clone(), config.clone());
         let fmt_config = FmtConfig::from(&current_project);
         InitActionContext {
@@ -137,8 +152,11 @@ impl InitActionContext {
         // cause a non-trivial amount of time due to disk access
         thread::spawn(move || {
             let mut config = config.lock().unwrap();
-            if let Err(e)  = config.infer_defaults(&current_project) {
-                debug!("Encountered an error while trying to infer config defaults: {:?}", e);
+            if let Err(e) = config.infer_defaults(&current_project) {
+                debug!(
+                    "Encountered an error while trying to infer config defaults: {:?}",
+                    e
+                );
             }
         });
 
@@ -160,13 +178,9 @@ impl InitActionContext {
             }
         };
 
-        out.notify(NotificationMessage::new(
-            NOTIFICATION_BUILD_BEGIN,
-            None,
-        ));
-        self.build_queue.request_build(project_path, priority, move |result| {
-            pbh.handle(result)
-        });
+        out.notify(NotificationMessage::new(NOTIFICATION_BUILD_BEGIN, None));
+        self.build_queue
+            .request_build(project_path, priority, move |result| pbh.handle(result));
     }
 
     fn build_current_project<O: Output>(&self, priority: BuildPriority, out: O) {
@@ -183,9 +197,11 @@ impl InitActionContext {
         let (start, end) = find_word_at_pos(&line, &pos.col);
         trace!("start: {}, end: {}", start.0, end.0);
 
-        Span::from_positions(span::Position::new(pos.row, start),
-                             span::Position::new(pos.row, end),
-                             file_path)
+        Span::from_positions(
+            span::Position::new(pos.row, start),
+            span::Position::new(pos.row, end),
+            file_path,
+        )
     }
 }
 
@@ -200,15 +216,26 @@ fn find_word_at_pos(line: &str, pos: &Column) -> (Column, Column) {
     let col = pos.0 as usize;
     let is_ident_char = |c: char| c.is_alphanumeric() || c == '_';
 
-    let start = line.chars().enumerate().take(col)
-                    .filter(|&(_, c)| !is_ident_char(c))
-                    .last().map(|(i, _)| i + 1).unwrap_or(0) as u32;
+    let start = line.chars()
+        .enumerate()
+        .take(col)
+        .filter(|&(_, c)| !is_ident_char(c))
+        .last()
+        .map(|(i, _)| i + 1)
+        .unwrap_or(0) as u32;
 
-    let end = line.chars().enumerate().skip(col)
-                .filter(|&(_, c)| !is_ident_char(c))
-                .nth(0).map(|(i, _)| i).unwrap_or(col) as u32;
+    let end = line.chars()
+        .enumerate()
+        .skip(col)
+        .filter(|&(_, c)| !is_ident_char(c))
+        .nth(0)
+        .map(|(i, _)| i)
+        .unwrap_or(col) as u32;
 
-    (span::Column::new_zero_indexed(start), span::Column::new_zero_indexed(end))
+    (
+        span::Column::new_zero_indexed(start),
+        span::Column::new_zero_indexed(end),
+    )
 }
 
 #[cfg(test)]
@@ -222,7 +249,12 @@ mod test {
             let col = test_str.find('|').unwrap() as u32;
             let line = test_str.replace('|', "");
             let (start, end) = find_word_at_pos(&line, &Column::new_zero_indexed(col));
-            assert_eq!(range, (start.0, end.0), "Assertion failed for {:?}", test_str);
+            assert_eq!(
+                range,
+                (start.0, end.0),
+                "Assertion failed for {:?}",
+                test_str
+            );
         }
 
         assert_range("|struct Def {", (0, 6));

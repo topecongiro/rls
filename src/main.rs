@@ -35,8 +35,8 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
-extern crate url;
 extern crate jsonrpc_core;
+extern crate url;
 
 use std::env;
 use std::sync::Arc;
@@ -55,8 +55,16 @@ mod test;
 const COMPILER_TIMEOUT: u64 = 1500;
 
 const CRATE_BLACKLIST: [&'static str; 10] = [
-    "libc", "typenum", "alloc", "idna", "openssl", "libunicode_normalization", "serde",
-    "serde_json", "librustc_serialize", "libunicode_segmentation",
+    "libc",
+    "typenum",
+    "alloc",
+    "idna",
+    "openssl",
+    "libunicode_normalization",
+    "serde",
+    "serde_json",
+    "librustc_serialize",
+    "libunicode_segmentation",
 ];
 
 const RUSTC_SHIM_ENV_VAR_NAME: &'static str = "RLS_RUSTC_SHIM";
@@ -66,7 +74,10 @@ type Span = span::Span<span::ZeroIndexed>;
 pub fn main() {
     env_logger::init().unwrap();
 
-    if env::var(RUSTC_SHIM_ENV_VAR_NAME).map(|v| v != "0").unwrap_or(false) {
+    if env::var(RUSTC_SHIM_ENV_VAR_NAME)
+        .map(|v| v != "0")
+        .unwrap_or(false)
+    {
         rustc_shim::run();
         return;
     }
@@ -87,7 +98,11 @@ pub fn main() {
 }
 
 fn version() -> &'static str {
-    concat!(env!("CARGO_PKG_VERSION"), "-", include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt")))
+    concat!(
+        env!("CARGO_PKG_VERSION"),
+        "-",
+        include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"))
+    )
 }
 
 fn help() -> &'static str {
